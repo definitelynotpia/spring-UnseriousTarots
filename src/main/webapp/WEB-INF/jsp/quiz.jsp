@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 <!DOCTYPE html>
 <html>
 	<head>
@@ -16,7 +17,7 @@
                 color: black;
                 text-decoration: none;
             }
-            input[type=radio] {
+            form:radiobutton {
                 margin-left: 20px;
                 margin-bottom: 15px;
             }
@@ -24,57 +25,42 @@
 	</head>
 	<body>
 		<h1>Exam Questions</h1>
-		<form action="result.jsp" method="post">
+		<form:form action="submit" method="post" modelAttribute="selectedAnswers">
             <ol>
-                <li>${ question1.content }</li>
-                <input type="radio" name="question1" id="1-0" value="${question1.getChoiceA()}" required/>
-                <label for="1-0">${question1.getChoiceA()}</label><br/>
-                <input type="radio" name="question1" id="1-1" value="${question1.getChoiceB()}" required/>
-                <label for="1-1">${question1.getChoiceB()}</label><br/>
-                <input type="radio" name="question1" id="1-2" value="${question1.getChoiceC()}" required/>
-                <label for="1-2">${question1.getChoiceC()}</label><br/>
+                <li><form:label path="question1">${question1.content}</form:label></li>
+                <form:radiobutton path="question1" value="${question1.getChoiceA()}" label="${question1.getChoiceA()}"/><br/>
+                <form:radiobutton path="question1" value="${question1.getChoiceB()}" label="${question1.getChoiceB()}"/><br/>
+                <form:radiobutton path="question1" value="${question1.getChoiceC()}" label="${question1.getChoiceC()}"/><br/>
 
-                <li>${ question2.content }</li>
-                <input type="radio" name="question2" id="2-0" value="${question2.getChoiceA()}" required/>
-                <label for="2-0">${question2.getChoiceA()}</label><br/>
-                <input type="radio" name="question2" id="2-1" value="${question2.getChoiceB()}" required/>
-                <label for="2-1">${question2.getChoiceB()}</label><br/>
-                <input type="radio" name="question2" id="2-2" value="${question2.getChoiceC()}" required/>
-                <label for="2-2">${question2.getChoiceC()}</label><br/>
+                <li><form:label path="question2">${question2.content}</form:label></li>
+                <form:radiobutton path="question2" value="${question2.getChoiceA()}" label="${question2.getChoiceA()}"/><br/>
+                <form:radiobutton path="question2" value="${question2.getChoiceB()}" label="${question2.getChoiceB()}"/><br/>
+                <form:radiobutton path="question2" value="${question2.getChoiceC()}" label="${question2.getChoiceC()}"/><br/>
 
-                <li>${ question3.content }</li>
-                <input type="radio" name="question3" id="3-0" value="${question3.getChoiceA()}" required/>
-                <label for="3-0">${question3.getChoiceA()}</label><br/>
-                <input type="radio" name="question3" id="3-1" value="${question3.getChoiceB()}" required/>
-                <label for="3-1">${question3.getChoiceB()}</label><br/>
-                <input type="radio" name="question3" id="3-2" value="${question3.getChoiceC()}" required/>
-                <label for="3-2">${question3.getChoiceC()}</label><br/>
+                <li><form:label path="question3">${question3.content}</form:label></li>
+                <form:radiobutton path="question3" value="${question3.getChoiceA()}" label="${question3.getChoiceA()}"/><br/>
+                <form:radiobutton path="question3" value="${question3.getChoiceB()}" label="${question3.getChoiceB()}"/><br/>
+                <form:radiobutton path="question3" value="${question3.getChoiceC()}" label="${question3.getChoiceC()}"/><br/>
 
-                <li>${ question4.content }</li>
-                <input type="radio" name="question4" id="4-0" value="${question4.getChoiceA()}" required/>
-                <label for="4-0">${question4.getChoiceA()}</label><br/>
-                <input type="radio" name="question4" id="4-1" value="${question4.getChoiceB()}" required/>
-                <label for="4-1">${question4.getChoiceB()}</label><br/>
-                <input type="radio" name="question4" id="4-2" value="${question4.getChoiceC()}" required/>
-                <label for="4-2">${question4.getChoiceC()}</label><br/>
+                <li><form:label path="question4">${question4.content}</form:label></li>
+                <form:radiobutton path="question4" value="${question4.getChoiceA()}" label="${question4.getChoiceA()}"/><br/>
+                <form:radiobutton path="question4" value="${question4.getChoiceB()}" label="${question4.getChoiceB()}"/><br/>
+                <form:radiobutton path="question4" value="${question4.getChoiceC()}" label="${question4.getChoiceC()}"/><br/>
 
-                <li>${ question5.content }</li>
-                <input type="radio" name="question5" id="5-0" value="${question5.getChoiceA()}" required/>
-                <label for="5-0">${question5.getChoiceA()}</label><br/>
-                <input type="radio" name="question5" id="5-1" value="${question5.getChoiceB()}" required/>
-                <label for="5-1">${question5.getChoiceB()}</label><br/>
-                <input type="radio" name="question5" id="5-2" value="${question5.getChoiceC()}" required/>
-                <label for="5-2">${question5.getChoiceC()}</label><br/>
+                <li><form:label path="question5">${question5.content}</form:label></li>
+                <form:radiobutton path="question5" value="${question5.getChoiceA()}" label="${question5.getChoiceA()}"/><br/>
+                <form:radiobutton path="question5" value="${question5.getChoiceB()}" label="${question5.getChoiceB()}"/><br/>
+                <form:radiobutton path="question5" value="${question5.getChoiceC()}" label="${question5.getChoiceC()}"/><br/>
             </ol>
 		    <hr/>
 
-	        <button type="submit">Submit</button>
+	        <form:button>Submit</form:button>
 	        <button type="button" onclick="resetRadioButtons()">Reset</button>
-	    </form>
+	    </form:form>
 
 		<script>
 		    function resetRadioButtons() {
-                var radioButtons = document.querySelectorAll('input[type="radio"]');
+                var radioButtons = document.querySelectorAll("form:radiobutton");
                 radioButtons.forEach(function(radioButton) {
                     radioButton.checked = false;
                 });

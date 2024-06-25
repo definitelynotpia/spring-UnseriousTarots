@@ -1,21 +1,17 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.Questions;
+import com.example.demo.model.SelectedAnswers;
 import com.example.demo.model.UserSession;
 import com.example.demo.model.Users;
 import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.configurationprocessor.json.JSONArray;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
-import net.sf.json.JSONArray;
 
 @Controller
 public class HomeController {
@@ -38,11 +34,16 @@ public class HomeController {
     @GetMapping("/register")
     public String showRegisterForm() { return "register"; }
 
+    @GetMapping("/logout")
+    public String logout() {
+        userSession.setEmail(null); // delete session
+        return "redirect:/login";
+    }
+
     @GetMapping("/quiz")
     public String showQuiz(Model model) {
         // initialize list of questions
-        List<Questions> questions = new ArrayList<>();
-        List<Questions> examItems = new ArrayList<>();
+            List<Questions> questions = new ArrayList<>();
 
         // multiple choice
         questions.add(new Questions("Which city is the capital of France?", new String[]{"Berlon", "Paris", "Madrid"}, "Paris"));
@@ -51,28 +52,38 @@ public class HomeController {
         questions.add(new Questions("Which element is NOT present in chemical symbol for water?", new String[]{"Oxygen", "Carbon", "Hydrogen"}, "Carbon"));
         questions.add(new Questions("Who painted the Mona Lisa?", new String[]{"Vincent van Gogh", "Pablo Picasso", "Leonardo da Vinci"}, "Leonardo da Vinci"));
 
-        // shuffle the questions
-        Collections.shuffle(questions);
-
         // save only the first 5 questions as exam items
         for (int i = 0; i < 5; i++) {
             Questions question = questions.get(i);
             String questionNo = "question".concat(Integer.toString(i+1));
-            System.out.println(questionNo);
             // store questions as page context attribute
             model.addAttribute(questionNo, question);
         }
 
+        // initialize user answers
+        SelectedAnswers selectedAnswers = new SelectedAnswers();
+        model.addAttribute("selectedAnswers", selectedAnswers);
+
         return "quiz";
     }
 
+    @RequestMapping(value = "/submit", method = RequestMethod.POST)
     @GetMapping("/result")
-    public String showResults() { return "result"; }
+    public String result(@ModelAttribute("selectedAnswers") SelectedAnswers selectedAnswers) {
+        Integer totalScore = 0; // count quiz score
 
-    @GetMapping("/logout")
-    public String logout() {
-        userSession.setEmail(null); // delete session
-        return "redirect:/login";
+        System.out.println("\nSELECTED ANSWERS:");
+        System.out.println(selectedAnswers.getQuestion1());
+        System.out.println(selectedAnswers.getQuestion2());
+        System.out.println(selectedAnswers.getQuestion3());
+        System.out.println(selectedAnswers.getQuestion4());
+        System.out.println(selectedAnswers.getQuestion5());
+
+        System.out.println("\nCORRECT ANSWERS:");
+        for(Map.Entry<String,List<Object>> question:Questions.questions.entrySet()){
+            System.out.println(question.getValue().get(1));
+        }
+        return "result";
     }
 
     @PostMapping("/login")
