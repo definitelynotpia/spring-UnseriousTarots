@@ -1,11 +1,21 @@
 package com.example.demo.controller;
 
+import com.example.demo.model.Questions;
 import com.example.demo.model.UserSession;
+import com.example.demo.model.Users;
 import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.boot.configurationprocessor.json.JSONArray;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import net.sf.json.JSONArray;
 
 @Controller
 public class HomeController {
@@ -15,32 +25,89 @@ public class HomeController {
 
     @GetMapping("/")
     public String home(Model model) {
-        if(userSession.getUsername()==null) return "redirect:/login";
-        model.addAttribute("message", "Hello, Springs Boot with JSP!");
+        // if not logged in, go to login page
+        if(userSession.getEmail()==null) return "redirect:/login";
+        model.addAttribute("message", "Hello, Spring Boot with JSP!");
         model.addAttribute("userSession", userSession);
         return "home";
     }
 
     @GetMapping("/login")
-    public String showLoginForm() {
-        return "login";
+    public String showLoginForm() { return "login"; }
+
+    @GetMapping("/register")
+    public String showRegisterForm() { return "register"; }
+
+    @GetMapping("/quiz")
+    public String showQuiz(Model model) {
+        // initialize list of questions
+        List<Questions> questions = new ArrayList<>();
+        List<Questions> examItems = new ArrayList<>();
+
+        // multiple choice
+        questions.add(new Questions("Which city is the capital of France?", new String[]{"Berlon", "Paris", "Madrid"}, "Paris"));
+        questions.add(new Questions("Which planet is known as the Red Planet?", new String[]{"Mars", "Saturn", "Jupiter"}, "Mars"));
+        questions.add(new Questions("Which ocean is the largest on earth?", new String[]{"Pacific Ocean", "Atlantic Ocean", "Indian Ocean"}, "Pacific Ocean"));
+        questions.add(new Questions("Which element is NOT present in chemical symbol for water?", new String[]{"Oxygen", "Carbon", "Hydrogen"}, "Carbon"));
+        questions.add(new Questions("Who painted the Mona Lisa?", new String[]{"Vincent van Gogh", "Pablo Picasso", "Leonardo da Vinci"}, "Leonardo da Vinci"));
+
+        // shuffle the questions
+        Collections.shuffle(questions);
+
+        // save only the first 5 questions as exam items
+        for (int i = 0; i < 5; i++) {
+            Questions question = questions.get(i);
+            String questionNo = "question".concat(Integer.toString(i+1));
+            System.out.println(questionNo);
+            // store questions as page context attribute
+            model.addAttribute(questionNo, question);
+        }
+
+        return "quiz";
     }
 
-    @PostMapping("/login")
-    public String login(String username, String password) {
-        // Your authentication logic goes here (e.g., check username/password against database)
-        System.out.println("username: " + username + ", password: " + password);
-        if ("jun".equals(username) && "123".equals(password)) {
-            userSession.setUsername(username);
-            return "redirect:/";
-        } else {
-            return "redirect:/login?error=invalid username or password";
-        }
-    }
+    @GetMapping("/result")
+    public String showResults() { return "result"; }
 
     @GetMapping("/logout")
     public String logout() {
-        userSession.setUsername(null);
+        userSession.setEmail(null); // delete session
         return "redirect:/login";
+    }
+
+    @PostMapping("/login")
+    public String login(String email, String password) {
+        System.out.println("email: " + email + ", password: " + password);
+        // check if account exists
+        for(Map.Entry<String,List<Object>> user:Users.loginCredentials.entrySet()){
+            // if email and password matches
+            if(email.equals(user.getKey())&&password.equals(user.getValue().get(0))){
+                userSession.setEmail(email); // if user exists, set user session
+                return "redirect:/"; // redirect to home
+            }
+        }
+        // else, if user does not exist
+        return "redirect:/login?error=Invalid email or password. Try again.";
+    }
+
+    @PostMapping("/register")
+    public String register(String email, String password) {
+        System.out.println("email: " + email + ", password: " + password);
+        // check if account already exists
+        for(Map.Entry<String,List<Object>> e:Users.loginCredentials.entrySet()){
+            if(email.equals(e.getKey())){
+                // if user exists, show error
+                return "redirect:/login?error=This email already has an account.";
+            }
+        }
+        // else, login as registered account
+        Users newUser = new Users(email, password, new int[] {}); // save user login credentials
+        userSession.setEmail(email);
+        return "redirect:/"; // go to home page
+    }
+
+    @PostMapping("/quiz")
+    public String quiz(Model model) {
+        return "redirect:/result";
     }
 }
