@@ -25,7 +25,7 @@
 	</head>
 	<body>
 		<h1>Exam Questions</h1>
-		<form:form action="submit" method="post" modelAttribute="selectedAnswers">
+		<form:form action="submit" method="post" modelAttribute="selected">
             <ol>
                 <li><form:label path="question1">${question1.content}</form:label></li>
                 <form:radiobutton path="question1" value="${question1.getChoiceA()}" label="${question1.getChoiceA()}"/><br/>
@@ -52,8 +52,8 @@
                 <form:radiobutton path="question5" value="${question5.getChoiceB()}" label="${question5.getChoiceB()}"/><br/>
                 <form:radiobutton path="question5" value="${question5.getChoiceC()}" label="${question5.getChoiceC()}"/><br/>
             </ol>
-		    <hr/>
 
+		    <hr/>
 	        <form:button>Submit</form:button>
 	        <button type="button" onclick="resetRadioButtons()">Reset</button>
 	    </form:form>

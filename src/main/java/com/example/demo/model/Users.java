@@ -14,7 +14,7 @@ import java.util.Map;
 public class Users {
 	public String email; // initialize attributes for login credentials
 	public String password;
-	public int examScores[]; // save score for each quiz attempt
+	public int examScores; // save score for each quiz attempt
 	
 	// initialize user accounts
     public static Map<String, List<Object>> loginCredentials = new HashMap<>();
@@ -27,11 +27,11 @@ public class Users {
     }
 
     // User constructor
-    public Users(String email, String password, int[] examScores) {
+    public Users(String email, String password) {
 		super();
 		this.email = email; // get login credentials
 		this.password = password;
-		this.examScores = examScores;
+		this.examScores = 0;
 		
 		// store password and exam scores in list
 		List<Object> userData = new ArrayList<>();
@@ -41,6 +41,21 @@ public class Users {
 		// append new user to users map
 		loginCredentials.put(email, userData);
 		System.out.println("registered user: " + email + ", " + password);
+	}
+
+	public void setExamScores(String email, int score) {
+		for(Map.Entry<String,List<Object>> user:loginCredentials.entrySet()){
+			String userKey = user.getKey();
+			List<Object> userData = user.getValue();
+			// if email and password matches
+			if(email.equals(userKey)){
+				List<Object> newData = new ArrayList<>();
+				newData.add(userData.get(0));
+				newData.add(score);
+				// update user score
+				loginCredentials.put(userKey, newData);
+			}
+		}
 	}
 
 }

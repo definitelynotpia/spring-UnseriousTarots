@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.Questions;
-import com.example.demo.model.SelectedAnswers;
+import com.example.demo.model.UserAnswers;
 import com.example.demo.model.UserSession;
 import com.example.demo.model.Users;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,17 +43,15 @@ public class HomeController {
     @GetMapping("/quiz")
     public String showQuiz(Model model) {
         // initialize list of questions
-            List<Questions> questions = new ArrayList<>();
-
-        // multiple choice
-        questions.add(new Questions("Which city is the capital of France?", new String[]{"Berlon", "Paris", "Madrid"}, "Paris"));
-        questions.add(new Questions("Which planet is known as the Red Planet?", new String[]{"Mars", "Saturn", "Jupiter"}, "Mars"));
-        questions.add(new Questions("Which ocean is the largest on earth?", new String[]{"Pacific Ocean", "Atlantic Ocean", "Indian Ocean"}, "Pacific Ocean"));
-        questions.add(new Questions("Which element is NOT present in chemical symbol for water?", new String[]{"Oxygen", "Carbon", "Hydrogen"}, "Carbon"));
-        questions.add(new Questions("Who painted the Mona Lisa?", new String[]{"Vincent van Gogh", "Pablo Picasso", "Leonardo da Vinci"}, "Leonardo da Vinci"));
+        List<Questions> questions = new ArrayList<>();
+        questions.add(new Questions(1, "Which city is the capital of France?", new String[]{"Berlin", "Paris", "Madrid"}, "Paris"));
+        questions.add(new Questions(2,"Which planet is known as the Red Planet?", new String[]{"Mars", "Saturn", "Jupiter"}, "Mars"));
+        questions.add(new Questions(3, "Which ocean is the largest on earth?", new String[]{"Pacific Ocean", "Atlantic Ocean", "Indian Ocean"}, "Pacific Ocean"));
+        questions.add(new Questions(4, "Which element is NOT present in chemical symbol for water?", new String[]{"Oxygen", "Carbon", "Hydrogen"}, "Carbon"));
+        questions.add(new Questions(5, "Who painted the Mona Lisa?", new String[]{"Vincent van Gogh", "Pablo Picasso", "Leonardo da Vinci"}, "Leonardo da Vinci"));
 
         // save only the first 5 questions as exam items
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < questions.size(); i++) {
             Questions question = questions.get(i);
             String questionNo = "question".concat(Integer.toString(i+1));
             // store questions as page context attribute
@@ -61,28 +59,59 @@ public class HomeController {
         }
 
         // initialize user answers
-        SelectedAnswers selectedAnswers = new SelectedAnswers();
-        model.addAttribute("selectedAnswers", selectedAnswers);
+        UserAnswers userAnswers = new UserAnswers();
+        model.addAttribute("selected", userAnswers);
 
         return "quiz";
     }
 
     @RequestMapping(value = "/submit", method = RequestMethod.POST)
     @GetMapping("/result")
-    public String result(@ModelAttribute("selectedAnswers") SelectedAnswers selectedAnswers) {
-        Integer totalScore = 0; // count quiz score
+    public String result(@ModelAttribute("selected") UserAnswers selected, Model model) {
+        // store examinee
+        String currentUser = userSession.getEmail();
+        int totalScore = 0; // count quiz score
+        int totalItems = Questions.questionsList.size(); // count total quiz items
+        // store user answers in list
+        List<String> userAnswers = new ArrayList<>();
+        userAnswers.add(selected.getQuestion1());
+        userAnswers.add(selected.getQuestion2());
+        userAnswers.add(selected.getQuestion3());
+        userAnswers.add(selected.getQuestion4());
+        userAnswers.add(selected.getQuestion5());
 
-        System.out.println("\nSELECTED ANSWERS:");
-        System.out.println(selectedAnswers.getQuestion1());
-        System.out.println(selectedAnswers.getQuestion2());
-        System.out.println(selectedAnswers.getQuestion3());
-        System.out.println(selectedAnswers.getQuestion4());
-        System.out.println(selectedAnswers.getQuestion5());
-
-        System.out.println("\nCORRECT ANSWERS:");
-        for(Map.Entry<String,List<Object>> question:Questions.questions.entrySet()){
-            System.out.println(question.getValue().get(1));
+        // compare selected answers to correct answers
+        for (int i = 0; i < Questions.questionsList.size(); i++) {
+            String selectedAnswer = userAnswers.get(i);
+            String correctAnswer = Questions.questionsList.get(i).getCorrectAnswer();
+            // if answers match, increment totalScore
+            if (selectedAnswer.equals(correctAnswer)) {
+                totalScore++;
+            }
         }
+
+        // update user score
+        for(Map.Entry<String,List<Object>> user:Users.loginCredentials.entrySet()){
+            String userKey = user.getKey();
+            List<Object> userData = user.getValue();
+            // if email and password matches
+            if(currentUser.equals(userKey)){
+                List<Object> newData = new ArrayList<>();
+                newData.add(userData.get(0));
+                newData.add(totalScore);
+                // update user score
+                Users.loginCredentials.put(userKey, newData);
+            }
+        }
+
+        // pass score values to result.jsp
+        model.addAttribute("totalScore", totalScore);
+        float percentScore = (totalScore!=0) ? ((totalScore * 100.0f) / totalItems) : 0; // get percent of score
+        model.addAttribute("percentScore", percentScore);
+        // pass current user to result.jsp
+        model.addAttribute("currentUser", currentUser);
+
+        // render result page
         return "result";
     }
 
@@ -112,13 +141,13 @@ public class HomeController {
             }
         }
         // else, login as registered account
-        Users newUser = new Users(email, password, new int[] {}); // save user login credentials
+        Users newUser = new Users(email, password); // save user login credentials
         userSession.setEmail(email);
         return "redirect:/"; // go to home page
     }
 
     @PostMapping("/quiz")
-    public String quiz(Model model) {
+    public String quiz() {
         return "redirect:/result";
     }
 }
